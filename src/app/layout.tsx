@@ -14,8 +14,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    // Suppress the hydration mismatch warning on <html>:
+    <html lang="en" suppressHydrationWarning>
+      {/* You can also do suppressHydrationWarning on <body> if you prefer */}
       <body className="font-ui-sans-serif antialiased">
+        {/*
+          Wrap the entire application with our client-side
+          Providers component (which includes the ThemeProvider).
+        */}
         <Providers>{children}</Providers>
       </body>
     </html>

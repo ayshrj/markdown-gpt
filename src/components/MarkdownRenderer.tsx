@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize"; // Added for security
+import IconProvider from "@/lib/iconProvider";
 
 // Define custom props for the code component
 interface CustomCodeProps extends React.HTMLAttributes<HTMLElement> {
@@ -22,43 +23,14 @@ interface CustomCodeProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
 }
 
-const STORAGE_KEY = "markdown-editor-content"; // Define a unique key for localStorage
-
 const MarkdownEditor: React.FC = () => {
-  // Initialize state with empty string; will be updated in useEffect
+  // Initialize state with empty string
   const [markdown, setMarkdown] = useState<string>("");
   const [previewMode, setPreviewMode] = useState<string>("full");
   const [currentPage, setCurrentPage] = useState(0);
 
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Load markdown from localStorage when the component mounts
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      // Ensure window is available
-      try {
-        const savedMarkdown = localStorage.getItem(STORAGE_KEY);
-        if (savedMarkdown) {
-          setMarkdown(savedMarkdown);
-        }
-      } catch (error) {
-        console.error("Failed to load markdown from localStorage:", error);
-      }
-    }
-  }, []);
-
-  // Save markdown to localStorage whenever it changes
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      // Ensure window is available
-      try {
-        localStorage.setItem(STORAGE_KEY, markdown);
-      } catch (error) {
-        console.error("Failed to save markdown to localStorage:", error);
-      }
-    }
-  }, [markdown]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMarkdown(e.target.value);
@@ -104,7 +76,6 @@ const MarkdownEditor: React.FC = () => {
   };
 
   // Styles close to ChatGPT's typical heading sizes
-  // (You can adjust margin, lineHeight, etc. to suit)
   const customTypographyStyles = {
     h1: {
       fontSize: "1.875rem", // ~30px
@@ -208,114 +179,136 @@ const MarkdownEditor: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gpt-background">
-      <Card className="w-full bg-gpt-background border-none">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Markdown Editor</CardTitle>
-            <Tabs
-              value={previewMode}
-              onValueChange={(value) => setPreviewMode(value)}
-            >
-              <TabsList className="bg-gpt-input-background">
-                <TabsTrigger value="full">Full Preview</TabsTrigger>
-                <TabsTrigger value="paginated">Paginated</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <div className="flex w-full cursor-text flex-col rounded-3xl px-4 focus:outline-none transition-colors contain-inline-size bg-gpt-input-background min-h-[88px] max-h-[216px] outline-none text-base border-none items-center">
-              <Textarea
-                className="
+    <div
+      className={`container min-w-full flex justify-center min-h-[100dvh] transition-all relative ${
+        markdown.length > 0 ? "" : ""
+      }`}
+    >
+      <div className="w-full max-w-3xl bg-gpt-background border-none max-md:px-4">
+        <div className="min-h-[100dvh] relative pt-4 flex flex-col">
+          <div
+            className={`flex w-full cursor-text flex-col rounded-3xl pl-2 pr-4 focus:outline-none transition-colors contain-inline-size bg-gpt-input-background min-h-[88px] max-h-[216px] outline-none text-base border-none items-center ${
+              markdown.length > 0 ? "" : "absolute top-1/2 -translate-y-1/2"
+            }`}
+          >
+            <Textarea
+              className="
                   flex w-full cursor-text flex-col mx-2 my-2 
-                  min-h-[88px] max-h-[216px] outline-none border-none 
+                  max-h-[216px] outline-none border-none 
                   focus:ring-0 focus:outline-none focus:border-none 
                   bg-gpt-input-background placeholder:text-gpt-input-placeholder-foreground 
                   text-base resize-none break-words
                 "
-                value={markdown}
-                onChange={handleChange}
-                autoresize={true}
-                placeholder="Message MarkdownGPT"
-              />
-            </div>
-            {/* Upload Button */}
-            <div className="flex items-center space-x-4">
-              <Button variant="secondary" onClick={handleUploadClick}>
-                Upload TXT File
-              </Button>
-              {/* Hidden File Input */}
-              <input
-                type="file"
-                accept=".txt"
-                ref={fileInputRef}
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              {/* Optional: Clear Button */}
+              value={markdown}
+              onChange={handleChange}
+              autoresize={true}
+              placeholder="Message MarkdownGPT"
+            />
+            <div className="min-h-[44px] max-h-[44px] flex w-full justify-between items-center px-2">
+              <span className="flex gap-4">
+                <IconProvider
+                  onClick={handleUploadClick}
+                  type="Clip"
+                  strokeWidth={0.1}
+                />
+                {previewMode === "full" ? (
+                  <IconProvider
+                    onClick={() => setPreviewMode("paginated")}
+                    className="cursor-pointer"
+                    type="Full"
+                  />
+                ) : (
+                  <IconProvider
+                    onClick={() => setPreviewMode("full")}
+                    className="cursor-pointer"
+                    type="Pagination"
+                  />
+                )}
+
+                <input
+                  type="file"
+                  accept=".txt"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </span>
+
               {markdown && (
-                <Button
-                  variant="outline"
+                <IconProvider
+                  type="Clear"
                   onClick={() => {
                     setMarkdown("");
                     setCurrentPage(0);
                   }}
-                >
-                  Clear
-                </Button>
+                  className="fill-gpt-foreground stroke-none h-8 w-8 translate-x-3 cursor-pointer"
+                />
               )}
             </div>
-            <div className="prose dark:prose-invert max-w-none break-words">
-              {previewMode === "full" ? (
+          </div>
+
+          <div className="prose dark:prose-invert max-w-none break-words mt-2 pb-20">
+            {" "}
+            {/* Added pb-20 */}
+            {previewMode === "full" ? (
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                components={components}
+              >
+                {markdown}
+              </ReactMarkdown>
+            ) : (
+              <div className="flex flex-col min-h-full">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeRaw, rehypeSanitize]} // Added rehypeSanitize for security
                   components={components}
                 >
-                  {markdown}
+                  {sections[currentPage]}
                 </ReactMarkdown>
-              ) : (
-                <div>
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw, rehypeSanitize]} // Added rehypeSanitize for security
-                    components={components}
-                  >
-                    {sections[currentPage]}
-                  </ReactMarkdown>
-                  <div className="flex justify-between mt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        setCurrentPage(Math.max(0, currentPage - 1))
-                      }
-                      disabled={currentPage === 0}
-                    >
-                      Previous
-                    </Button>
-                    <div className="text-center">
-                      Page {currentPage + 1} of {sections.length}
+                {markdown.length > 0 && (
+                  <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-3xl px-4 bg-gpt-background">
+                    <div className="flex justify-between items-center py-2 rounded shadow">
+                      <button
+                        className={`bg-gpt-foreground text-gpt-background px-4 py-2 rounded text-sm ${
+                          currentPage === 0
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:bg-gpt-foreground/80"
+                        }`}
+                        onClick={() =>
+                          setCurrentPage(Math.max(0, currentPage - 1))
+                        }
+                        disabled={currentPage === 0}
+                      >
+                        Previous
+                      </button>
+                      <div className="text-center flex items-center justify-end">
+                        {currentPage + 1} of {sections.length}
+                      </div>
+                      <button
+                        className={`bg-gpt-foreground text-gpt-background px-4 py-2 rounded text-sm ${
+                          currentPage === sections.length - 1
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:bg-gpt-foreground/80"
+                        }`}
+                        onClick={() =>
+                          setCurrentPage(
+                            Math.min(sections.length - 1, currentPage + 1)
+                          )
+                        }
+                        disabled={currentPage === sections.length - 1}
+                      >
+                        Next
+                      </button>
                     </div>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        setCurrentPage(
-                          Math.min(sections.length - 1, currentPage + 1)
-                        )
-                      }
-                      disabled={currentPage === sections.length - 1}
-                    >
-                      Next
-                    </Button>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
