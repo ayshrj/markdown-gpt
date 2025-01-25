@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,9 @@ const MarkdownEditor: React.FC = () => {
   const [markdown, setMarkdown] = useState<string>("");
   const [previewMode, setPreviewMode] = useState<string>("full");
   const [currentPage, setCurrentPage] = useState(0);
+
+  // Ref for the hidden file input
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Load markdown from localStorage when the component mounts
   useEffect(() => {
@@ -65,6 +68,40 @@ const MarkdownEditor: React.FC = () => {
   const sections = useMemo(() => {
     return markdown.split("---").map((section) => section.trim());
   }, [markdown]);
+
+  // Handler to trigger file input click
+  const handleUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // Handler for file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (file.type !== "text/plain") {
+        alert("Please upload a valid .txt file.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result;
+        if (typeof text === "string") {
+          setMarkdown(text);
+          setCurrentPage(0); // Reset to first page after upload
+        } else {
+          alert("Failed to read the file.");
+        }
+      };
+      reader.onerror = () => {
+        alert("An error occurred while reading the file.");
+      };
+      reader.readAsText(file);
+    }
+  };
 
   // Styles close to ChatGPT's typical heading sizes
   // (You can adjust margin, lineHeight, etc. to suit)
@@ -128,7 +165,7 @@ const MarkdownEditor: React.FC = () => {
             style={syntaxStyle as any}
             language={match[1]}
             PreTag="div"
-            className="!bg-[#0D0D0D]"
+            className="!bg-[#0D0D0D] overflow-x-auto rounded" // Allows horizontal scrolling
             {...props}
           >
             {String(children).replace(/\n$/, "")}
@@ -136,7 +173,10 @@ const MarkdownEditor: React.FC = () => {
         );
       } else {
         return (
-          <code className={`${className} inline-code`} {...props}>
+          <code
+            className={`${className} inline-code break-words whitespace-pre-wrap`}
+            {...props}
+          >
             {children}
           </code>
         );
@@ -145,20 +185,26 @@ const MarkdownEditor: React.FC = () => {
 
     // Lists (unordered, ordered)
     ul: ({ children, ...props }) => (
-      <ul className="list-disc pl-6 mb-4" {...props}>
+      <ul className="list-disc pl-6 mb-4 break-words" {...props}>
         {children}
       </ul>
     ),
     ol: ({ children, ...props }) => (
-      <ol className="list-decimal pl-6 mb-4" {...props}>
+      <ol className="list-decimal pl-6 mb-4 break-words" {...props}>
         {children}
       </ol>
     ),
     li: ({ children, ...props }) => (
-      <li className="mb-1" {...props}>
+      <li className="mb-1 break-words" {...props}>
         {children}
       </li>
     ),
+    p: ({ children, ...props }) => (
+      <p className="break-words" {...props}>
+        {children}
+      </p>
+    ),
+    // Add other components as needed
   };
 
   return (
@@ -182,14 +228,46 @@ const MarkdownEditor: React.FC = () => {
           <div className="space-y-6">
             <div className="flex w-full cursor-text flex-col rounded-3xl px-4 focus:outline-none transition-colors contain-inline-size bg-gpt-input-background min-h-[88px] max-h-[216px] outline-none text-base border-none items-center">
               <Textarea
-                className="flex w-full cursor-text flex-col mx-2 my-2 min-h-[88px] max-h-[216px] outline-none border-none focus:ring-0 focus:outline-none focus:border-none bg-gpt-input-background placeholder:text-gpt-input-placholder-foreground text-base resize-none"
+                className="
+                  flex w-full cursor-text flex-col mx-2 my-2 
+                  min-h-[88px] max-h-[216px] outline-none border-none 
+                  focus:ring-0 focus:outline-none focus:border-none 
+                  bg-gpt-input-background placeholder:text-gpt-input-placeholder-foreground 
+                  text-base resize-none break-words
+                "
                 value={markdown}
                 onChange={handleChange}
                 autoresize={true}
                 placeholder="Message MarkdownGPT"
               />
             </div>
-            <div className="prose dark:prose-invert max-w-none">
+            {/* Upload Button */}
+            <div className="flex items-center space-x-4">
+              <Button variant="secondary" onClick={handleUploadClick}>
+                Upload TXT File
+              </Button>
+              {/* Hidden File Input */}
+              <input
+                type="file"
+                accept=".txt"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              {/* Optional: Clear Button */}
+              {markdown && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setMarkdown("");
+                    setCurrentPage(0);
+                  }}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+            <div className="prose dark:prose-invert max-w-none break-words">
               {previewMode === "full" ? (
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
