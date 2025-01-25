@@ -30,6 +30,23 @@ const MarkdownEditor: React.FC = () => {
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Load markdown from localStorage on component mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedMarkdown = localStorage.getItem("markdown-content");
+      if (savedMarkdown) {
+        setMarkdown(savedMarkdown);
+      }
+    }
+  }, []);
+
+  // Save markdown to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("markdown-content", markdown);
+    }
+  }, [markdown]);
+
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMarkdown(e.target.value);
     setCurrentPage(0); // Reset to first page on markdown change
@@ -265,6 +282,10 @@ const MarkdownEditor: React.FC = () => {
                   onClick={() => {
                     setMarkdown("");
                     setCurrentPage(0);
+                    // Optionally, remove from localStorage when cleared
+                    if (typeof window !== "undefined") {
+                      localStorage.removeItem("markdown-content");
+                    }
                   }}
                   className="fill-gpt-foreground stroke-none h-8 w-8 translate-x-3 cursor-pointer"
                 />
