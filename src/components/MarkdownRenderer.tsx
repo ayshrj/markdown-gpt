@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,49 +22,89 @@ interface CustomCodeProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
 }
 
+const STORAGE_KEY = "markdown-editor-content"; // Define a unique key for localStorage
+
 const MarkdownEditor: React.FC = () => {
-  const [markdown, setMarkdown] = useState<string>(
-    `# Heading 1
-## Heading 2
-### Heading 3
-#### Heading 4
-##### Heading 5
-###### Heading 6
-
-Regular text with **bold**, *italic*, ***bold and italic***, and ~~strikethrough~~.
-
-> Blockquote example
-
-Some \`inline code\`
-
-\`\`\`typescript
-// Code block example
-const scale = (size: number) => size * 2;
-\`\`\`
-
-- List item 1
-- List item 2
-  - Nested list item`
-  );
+  // Initialize state with empty string; will be updated in useEffect
+  const [markdown, setMarkdown] = useState<string>("");
   const [previewMode, setPreviewMode] = useState<string>("full");
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // Load markdown from localStorage when the component mounts
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Ensure window is available
+      try {
+        const savedMarkdown = localStorage.getItem(STORAGE_KEY);
+        if (savedMarkdown) {
+          setMarkdown(savedMarkdown);
+        }
+      } catch (error) {
+        console.error("Failed to load markdown from localStorage:", error);
+      }
+    }
+  }, []);
+
+  // Save markdown to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Ensure window is available
+      try {
+        localStorage.setItem(STORAGE_KEY, markdown);
+      } catch (error) {
+        console.error("Failed to save markdown to localStorage:", error);
+      }
+    }
+  }, [markdown]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMarkdown(e.target.value);
+    setCurrentPage(0); // Reset to first page on markdown change
   };
 
   const sections = useMemo(() => {
     return markdown.split("---").map((section) => section.trim());
   }, [markdown]);
 
-  const [currentPage, setCurrentPage] = useState(0);
-
+  // Styles close to ChatGPT's typical heading sizes
+  // (You can adjust margin, lineHeight, etc. to suit)
   const customTypographyStyles = {
-    h1: { fontSize: "2.5rem", fontWeight: "bold", marginBottom: "0.5rem" },
-    h2: { fontSize: "2rem", fontWeight: "bold", marginBottom: "0.5rem" },
-    h3: { fontSize: "1.75rem", fontWeight: "bold", marginBottom: "0.5rem" },
-    h4: { fontSize: "1.5rem", fontWeight: "bold", marginBottom: "0.5rem" },
-    h5: { fontSize: "1.25rem", fontWeight: "bold", marginBottom: "0.5rem" },
-    h6: { fontSize: "1rem", fontWeight: "bold", marginBottom: "0.5rem" },
+    h1: {
+      fontSize: "1.875rem", // ~30px
+      fontWeight: 600,
+      margin: "1rem 0 0.75rem",
+      lineHeight: "1.3",
+    },
+    h2: {
+      fontSize: "1.5rem", // ~24px
+      fontWeight: 600,
+      margin: "1rem 0 0.75rem",
+      lineHeight: "1.3",
+    },
+    h3: {
+      fontSize: "1.25rem", // ~20px (as requested)
+      fontWeight: 600,
+      margin: "1rem 0 0.5rem",
+      lineHeight: "1.3",
+    },
+    h4: {
+      fontSize: "1.125rem", // ~18px
+      fontWeight: 600,
+      margin: "1rem 0 0.5rem",
+      lineHeight: "1.3",
+    },
+    h5: {
+      fontSize: "1rem", // 16px
+      fontWeight: 600,
+      margin: "0.75rem 0 0.5rem",
+      lineHeight: "1.3",
+    },
+    h6: {
+      fontSize: "0.875rem", // 14px
+      fontWeight: 600,
+      margin: "0.75rem 0 0.5rem",
+      lineHeight: "1.3",
+    },
   };
 
   // Define the custom components for ReactMarkdown
@@ -75,6 +115,8 @@ const scale = (size: number) => size * 2;
     h4: (props) => <h4 style={customTypographyStyles.h4} {...props} />,
     h5: (props) => <h5 style={customTypographyStyles.h5} {...props} />,
     h6: (props) => <h6 style={customTypographyStyles.h6} {...props} />,
+
+    // Code blocks
     code: ({ inline, className, children, ...props }: CustomCodeProps) => {
       const match = /language-(\w+)/.exec(className || "");
       if (!inline && match) {
@@ -86,6 +128,7 @@ const scale = (size: number) => size * 2;
             style={syntaxStyle as any}
             language={match[1]}
             PreTag="div"
+            className="!bg-[#0D0D0D]"
             {...props}
           >
             {String(children).replace(/\n$/, "")}
@@ -99,6 +142,23 @@ const scale = (size: number) => size * 2;
         );
       }
     },
+
+    // Lists (unordered, ordered)
+    ul: ({ children, ...props }) => (
+      <ul className="list-disc pl-6 mb-4" {...props}>
+        {children}
+      </ul>
+    ),
+    ol: ({ children, ...props }) => (
+      <ol className="list-decimal pl-6 mb-4" {...props}>
+        {children}
+      </ol>
+    ),
+    li: ({ children, ...props }) => (
+      <li className="mb-1" {...props}>
+        {children}
+      </li>
+    ),
   };
 
   return (

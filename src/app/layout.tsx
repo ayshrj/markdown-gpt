@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
+import Providers from "@/components/Providers";
 import "./globals.css";
 import "./override.css";
 
@@ -16,13 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-ui-sans-serif antialiased">
-        <ThemeProvider
-          attribute="class" // Applies the theme class to <html>
-          defaultTheme="dark" // Sets the default theme to dark
-          enableSystem={false} // Disables system theme detection
-        >
-          {children}
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
