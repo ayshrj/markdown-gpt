@@ -1,10 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Prism as SyntaxHighlighter,
   SyntaxHighlighterProps,
@@ -28,6 +25,7 @@ const MarkdownEditor: React.FC = () => {
   const [markdown, setMarkdown] = useState<string>("");
   const [previewMode, setPreviewMode] = useState<string>("full");
   const [currentPage, setCurrentPage] = useState(0);
+  const [copied, setCopied] = useState<boolean>(false);
 
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -73,6 +71,21 @@ const MarkdownEditor: React.FC = () => {
       };
       reader.readAsText(file);
     }
+  };
+
+  // Handle Copy to Clipboard
+  const handleCopy = () => {
+    if (!markdown) return; // Do nothing if there's nothing to copy
+
+    navigator.clipboard
+      .writeText(markdown)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {
+        alert("Failed to copy the content.");
+      });
   };
 
   // Styles close to ChatGPT's typical heading sizes
@@ -224,6 +237,18 @@ const MarkdownEditor: React.FC = () => {
                     type="Pagination"
                   />
                 )}
+                {markdown.length > 0 &&
+                  (copied ? (
+                    <IconProvider type="Check" />
+                  ) : (
+                    <IconProvider
+                      type="Copy"
+                      onClick={handleCopy}
+                      className={`cursor-pointer ${
+                        markdown ? "" : "opacity-50 cursor-not-allowed"
+                      }`}
+                    />
+                  ))}
 
                 <input
                   type="file"
