@@ -105,6 +105,52 @@ const MarkdownEditor: React.FC = () => {
       });
   };
 
+  // Handle Paste from Clipboard
+  const handlePaste = async () => {
+    // Check if the Clipboard API is supported
+    if (!navigator.clipboard) {
+      alert("Clipboard API not supported in this browser.");
+      return;
+    }
+
+    try {
+      // Read text from the clipboard
+      const clipboardText = await navigator.clipboard.readText();
+
+      if (clipboardText) {
+        // Option 1: Append the pasted text to the existing markdown
+        setMarkdown((prevMarkdown) => `${prevMarkdown}\n${clipboardText}`);
+
+        // Option 2: Insert the pasted text at the cursor position
+        // Uncomment the following block to enable insertion at cursor
+
+        /*
+          if (textareaRef.current) {
+            const { selectionStart, selectionEnd } = textareaRef.current;
+            const before = markdown.substring(0, selectionStart);
+            const after = markdown.substring(selectionEnd);
+            setMarkdown(`${before}${clipboardText}${after}`);
+            // Optionally, set the cursor position after the pasted text
+            setTimeout(() => {
+              textareaRef.current?.focus();
+              textareaRef.current?.setSelectionRange(
+                selectionStart + clipboardText.length,
+                selectionStart + clipboardText.length
+              );
+            }, 0);
+          }
+          */
+
+        setCurrentPage(0); // Reset to the first page if applicable
+      } else {
+        alert("Clipboard is empty or does not contain text.");
+      }
+    } catch (error) {
+      console.error("Failed to read clipboard contents:", error);
+      alert("Failed to paste content from clipboard.");
+    }
+  };
+
   // Styles close to ChatGPT's typical heading sizes
   const customTypographyStyles = {
     h1: {
@@ -258,6 +304,13 @@ const MarkdownEditor: React.FC = () => {
                     fill="currentColor"
                   />
                 )}
+                <IconProvider
+                  type="Paste"
+                  onClick={handlePaste}
+                  className="cursor-pointer"
+                  strokeWidth={0.1}
+                  fill="currentColor"
+                />
                 {markdown.length > 0 &&
                   (copied ? (
                     <IconProvider
