@@ -246,17 +246,25 @@ const MarkdownEditor: React.FC = () => {
                     onClick={() => setPreviewMode("paginated")}
                     className="cursor-pointer"
                     type="Full"
+                    strokeWidth={0.1}
+                    fill="currentColor"
                   />
                 ) : (
                   <IconProvider
                     onClick={() => setPreviewMode("full")}
                     className="cursor-pointer"
                     type="Pagination"
+                    strokeWidth={0.1}
+                    fill="currentColor"
                   />
                 )}
                 {markdown.length > 0 &&
                   (copied ? (
-                    <IconProvider type="Check" />
+                    <IconProvider
+                      type="Check"
+                      strokeWidth={0.1}
+                      fill="currentColor"
+                    />
                   ) : (
                     <IconProvider
                       type="Copy"
@@ -264,6 +272,8 @@ const MarkdownEditor: React.FC = () => {
                       className={`cursor-pointer ${
                         markdown ? "" : "opacity-50 cursor-not-allowed"
                       }`}
+                      strokeWidth={0.1}
+                      fill="currentColor"
                     />
                   ))}
 
@@ -277,18 +287,21 @@ const MarkdownEditor: React.FC = () => {
               </span>
 
               {markdown && (
-                <IconProvider
-                  type="Clear"
-                  onClick={() => {
-                    setMarkdown("");
-                    setCurrentPage(0);
-                    // Optionally, remove from localStorage when cleared
-                    if (typeof window !== "undefined") {
-                      localStorage.removeItem("markdown-content");
-                    }
-                  }}
-                  className="fill-gpt-foreground stroke-none h-8 w-8 translate-x-3 cursor-pointer"
-                />
+                <>
+                  <div className="bg-gpt-foreground min-h-8 min-w-8 h-8 w-8 rounded-full text-gpt-background flex items-center justify-center translate-x-3 cursor-pointer">
+                    <IconProvider
+                      type="Clear"
+                      onClick={() => {
+                        setMarkdown("");
+                        setCurrentPage(0);
+                        // Optionally, remove from localStorage when cleared
+                        if (typeof window !== "undefined") {
+                          localStorage.removeItem("markdown-content");
+                        }
+                      }}
+                    />
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -317,11 +330,18 @@ const MarkdownEditor: React.FC = () => {
                   <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-3xl px-4 bg-gpt-background">
                     <div className="flex justify-between items-center py-2 rounded shadow">
                       <button
-                        className={`bg-gpt-foreground text-gpt-background px-4 py-2 rounded text-sm ${
+                        className={`bg-gpt-foreground text-gpt-background px-4 py-2 rounded-full text-sm ${
                           currentPage === 0
                             ? "opacity-50 cursor-not-allowed"
                             : "hover:bg-gpt-foreground/80"
                         }`}
+                        onKeyDown={(e) => {
+                          if (e.code === "ArrowLeft") {
+                            setCurrentPage(
+                              Math.min(sections.length - 1, currentPage + 1)
+                            );
+                          }
+                        }}
                         onClick={() =>
                           setCurrentPage(Math.max(0, currentPage - 1))
                         }
@@ -329,15 +349,22 @@ const MarkdownEditor: React.FC = () => {
                       >
                         Previous
                       </button>
-                      <div className="text-center flex items-center justify-end">
+                      <div className="text-center text-xs flex items-center justify-end">
                         {currentPage + 1} of {sections.length}
                       </div>
                       <button
-                        className={`bg-gpt-foreground text-gpt-background px-4 py-2 rounded text-sm ${
+                        className={`bg-gpt-foreground text-gpt-background px-4 py-2 rounded-full text-sm ${
                           currentPage === sections.length - 1
                             ? "opacity-50 cursor-not-allowed"
                             : "hover:bg-gpt-foreground/80"
                         }`}
+                        onKeyDown={(e) => {
+                          if (e.code === "ArrowRight") {
+                            setCurrentPage(
+                              Math.min(sections.length - 1, currentPage + 1)
+                            );
+                          }
+                        }}
                         onClick={() =>
                           setCurrentPage(
                             Math.min(sections.length - 1, currentPage + 1)
