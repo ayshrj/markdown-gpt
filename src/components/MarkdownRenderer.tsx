@@ -258,6 +258,30 @@ const MarkdownEditor: React.FC = () => {
     // Add other components as needed
   };
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (previewMode === "paginated") {
+      if (e.code === "ArrowLeft") {
+        // Navigate to the previous page
+        setCurrentPage((prevPage) => Math.max(0, prevPage - 1));
+      } else if (e.code === "ArrowRight") {
+        // Navigate to the next page
+        setCurrentPage((prevPage) =>
+          Math.min(sections.length - 1, prevPage + 1)
+        );
+      }
+    }
+  };
+
+  // Attach the global keydown listener
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [previewMode, sections.length]);
+
   return (
     <div
       className={`container min-w-full flex justify-center min-h-[100dvh] transition-all relative ${
@@ -296,6 +320,7 @@ const MarkdownEditor: React.FC = () => {
                     onClick={handleUploadClick}
                     type="Clip"
                     strokeWidth={0.1}
+                    className="cursor-pointer"
                   />
                   {previewMode === "full" ? (
                     <IconProvider
@@ -407,13 +432,6 @@ const MarkdownEditor: React.FC = () => {
                             ? "opacity-50 cursor-not-allowed"
                             : "hover:bg-gpt-foreground/80"
                         }`}
-                        onKeyDown={(e) => {
-                          if (e.code === "ArrowLeft") {
-                            setCurrentPage(
-                              Math.min(sections.length - 1, currentPage + 1)
-                            );
-                          }
-                        }}
                         onClick={() =>
                           setCurrentPage(Math.max(0, currentPage - 1))
                         }
@@ -430,13 +448,6 @@ const MarkdownEditor: React.FC = () => {
                             ? "opacity-50 cursor-not-allowed"
                             : "hover:bg-gpt-foreground/80"
                         }`}
-                        onKeyDown={(e) => {
-                          if (e.code === "ArrowRight") {
-                            setCurrentPage(
-                              Math.min(sections.length - 1, currentPage + 1)
-                            );
-                          }
-                        }}
                         onClick={() =>
                           setCurrentPage(
                             Math.min(sections.length - 1, currentPage + 1)
