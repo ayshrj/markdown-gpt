@@ -10,7 +10,7 @@ interface TextareaProps extends React.ComponentProps<"textarea"> {
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, autoresize = false, style, ...props }, ref) => {
     const textareaClassNames =
-      "flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50";
+      "flex w-full rounded-md border border-input bg-transparent py-2 text-base placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50";
 
     if (autoresize) {
       const { height, ...restStyle } = style || {};

@@ -267,95 +267,102 @@ const MarkdownEditor: React.FC = () => {
               markdown.length > 0 ? "" : "absolute top-1/2 -translate-y-1/2"
             }`}
           >
-            <Textarea
-              className="
+            <div className="flex flex-col w-full min-h-full relative">
+              {markdown.length < 1 && (
+                <div className="absolute left-1/2 top-0 -translate-y-[60px] font-semibold w-full flex justify-center -translate-x-1/2 text-3xl">
+                  Write your markdown here.
+                </div>
+              )}
+              <Textarea
+                className="
                   flex w-full cursor-text flex-col mx-2 my-2 
                   max-h-[216px] outline-none border-none 
                   focus:ring-0 focus:outline-none focus:border-none 
                   bg-gpt-input-background placeholder:text-gpt-input-placeholder-foreground 
                   text-base resize-none break-words
                 "
-              value={markdown}
-              onChange={handleChange}
-              autoresize={true}
-              placeholder="Message MarkdownGPT"
-            />
-            <div className="min-h-[44px] max-h-[44px] flex w-full justify-between items-center px-2">
-              <span className="flex gap-4">
-                <IconProvider
-                  onClick={handleUploadClick}
-                  type="Clip"
-                  strokeWidth={0.1}
-                />
-                {previewMode === "full" ? (
+                value={markdown}
+                onChange={handleChange}
+                autoresize={true}
+                placeholder="Message MarkdownGPT"
+              />
+              <div className="min-h-[44px] max-h-[44px] flex w-full justify-between items-center px-2">
+                <span className="flex gap-4">
                   <IconProvider
-                    onClick={() => setPreviewMode("paginated")}
-                    className="cursor-pointer"
-                    type="Full"
+                    onClick={handleUploadClick}
+                    type="Clip"
                     strokeWidth={0.1}
-                    fill="currentColor"
                   />
-                ) : (
-                  <IconProvider
-                    onClick={() => setPreviewMode("full")}
-                    className="cursor-pointer"
-                    type="Pagination"
-                    strokeWidth={0.1}
-                    fill="currentColor"
-                  />
-                )}
-                <IconProvider
-                  type="Paste"
-                  onClick={handlePaste}
-                  className="cursor-pointer"
-                  strokeWidth={0.1}
-                  fill="currentColor"
-                />
-                {markdown.length > 0 &&
-                  (copied ? (
+                  {previewMode === "full" ? (
                     <IconProvider
-                      type="Check"
+                      onClick={() => setPreviewMode("paginated")}
+                      className="cursor-pointer"
+                      type="Full"
                       strokeWidth={0.1}
                       fill="currentColor"
                     />
                   ) : (
                     <IconProvider
-                      type="Copy"
-                      onClick={handleCopy}
-                      className={`cursor-pointer ${
-                        markdown ? "" : "opacity-50 cursor-not-allowed"
-                      }`}
+                      onClick={() => setPreviewMode("full")}
+                      className="cursor-pointer"
+                      type="Pagination"
                       strokeWidth={0.1}
                       fill="currentColor"
                     />
-                  ))}
+                  )}
+                  <IconProvider
+                    type="Paste"
+                    onClick={handlePaste}
+                    className="cursor-pointer"
+                    strokeWidth={0.1}
+                    fill="currentColor"
+                  />
+                  {markdown.length > 0 &&
+                    (copied ? (
+                      <IconProvider
+                        type="Check"
+                        strokeWidth={0.1}
+                        fill="currentColor"
+                      />
+                    ) : (
+                      <IconProvider
+                        type="Copy"
+                        onClick={handleCopy}
+                        className={`cursor-pointer ${
+                          markdown ? "" : "opacity-50 cursor-not-allowed"
+                        }`}
+                        strokeWidth={0.1}
+                        fill="currentColor"
+                      />
+                    ))}
 
-                <input
-                  type="file"
-                  accept=".txt"
-                  ref={fileInputRef}
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </span>
+                  <input
+                    type="file"
+                    accept=".txt"
+                    ref={fileInputRef}
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </span>
 
-              {markdown && (
-                <>
-                  <div className="bg-gpt-foreground min-h-8 min-w-8 h-8 w-8 rounded-full text-gpt-background flex items-center justify-center translate-x-3 cursor-pointer">
-                    <IconProvider
-                      type="Clear"
-                      onClick={() => {
-                        setMarkdown("");
-                        setCurrentPage(0);
-                        // Optionally, remove from localStorage when cleared
-                        if (typeof window !== "undefined") {
-                          localStorage.removeItem("markdown-content");
-                        }
-                      }}
-                    />
-                  </div>
-                </>
-              )}
+                {markdown && (
+                  <>
+                    <div className="bg-gpt-foreground min-h-8 min-w-8 h-8 w-8 rounded-full text-gpt-background flex items-center justify-center translate-x-3 cursor-pointer">
+                      <IconProvider
+                        type="Clear"
+                        onClick={() => {
+                          setMarkdown("");
+                          setCurrentPage(0);
+                          // Optionally, remove from localStorage when cleared
+                          if (typeof window !== "undefined") {
+                            localStorage.removeItem("markdown-content");
+                          }
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
