@@ -23,7 +23,7 @@ interface CustomCodeProps extends React.HTMLAttributes<HTMLElement> {
 const MarkdownEditor: React.FC = () => {
   // Initialize state with empty string
   const [markdown, setMarkdown] = useState<string>("");
-  const [previewMode, setPreviewMode] = useState<string>("full");
+  const [previewMode, setPreviewMode] = useState<string>("paginated");
   const [currentPage, setCurrentPage] = useState(0);
   const [copied, setCopied] = useState<boolean>(false);
   const [pasted, setPasted] = useState<boolean>(false);
