@@ -26,6 +26,7 @@ const MarkdownEditor: React.FC = () => {
   const [previewMode, setPreviewMode] = useState<string>("full");
   const [currentPage, setCurrentPage] = useState(0);
   const [copied, setCopied] = useState<boolean>(false);
+  const [pasted, setPasted] = useState<boolean>(false);
 
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -142,6 +143,9 @@ const MarkdownEditor: React.FC = () => {
           */
 
         setCurrentPage(0); // Reset to the first page if applicable
+
+        setPasted(true);
+        setTimeout(() => setPasted(false), 2000);
       } else {
         alert("Clipboard is empty or does not contain text.");
       }
@@ -269,7 +273,7 @@ const MarkdownEditor: React.FC = () => {
           >
             <div className="flex flex-col w-full min-h-full relative">
               {markdown.length < 1 && (
-                <div className="absolute left-1/2 top-0 -translate-y-[60px] font-semibold w-full flex justify-center -translate-x-1/2 text-3xl">
+                <div className="absolute left-1/2 top-0 -translate-y-[90px] sm:-translate-y-[60px] font-semibold w-full flex justify-center -translate-x-1/2 text-3xl">
                   Write your markdown here.
                 </div>
               )}
@@ -310,13 +314,21 @@ const MarkdownEditor: React.FC = () => {
                       fill="currentColor"
                     />
                   )}
-                  <IconProvider
-                    type="Paste"
-                    onClick={handlePaste}
-                    className="cursor-pointer"
-                    strokeWidth={0.1}
-                    fill="currentColor"
-                  />
+                  {pasted ? (
+                    <IconProvider
+                      type="Check"
+                      strokeWidth={0.1}
+                      fill="currentColor"
+                    />
+                  ) : (
+                    <IconProvider
+                      type="Paste"
+                      onClick={handlePaste}
+                      className="cursor-pointer"
+                      strokeWidth={0.1}
+                      fill="currentColor"
+                    />
+                  )}
                   {markdown.length > 0 &&
                     (copied ? (
                       <IconProvider
