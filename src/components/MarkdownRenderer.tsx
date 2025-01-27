@@ -216,6 +216,9 @@ const MarkdownEditor: React.FC = () => {
 
     code: ({ inline, className, children, ...props }: CustomCodeProps) => {
       const match = /language-(\w+)/.exec(className || "");
+
+      const language = match && match[1] ? match[1] : "";
+
       if (!inline && match) {
         const syntaxStyle: SyntaxHighlighterProps["style"] = vscDarkPlus;
 
@@ -229,7 +232,7 @@ const MarkdownEditor: React.FC = () => {
                 className="font-mono text-xs"
                 style={{ fontFamily: '"Source Code Pro", monospace' }}
               >
-                {match[1]}
+                {language}
               </div>
               <div className="flex items-center rounded font-sans text-xs">
                 <button
@@ -264,7 +267,7 @@ const MarkdownEditor: React.FC = () => {
             </div>
             <SyntaxHighlighter
               style={syntaxStyle as any}
-              language={match[1]}
+              language={language}
               PreTag="div"
               id="codeblock"
               className="!bg-[#0D0D0D] overflow-x-auto rounded !p-4"
@@ -278,8 +281,12 @@ const MarkdownEditor: React.FC = () => {
       } else {
         return (
           <code
-            className={`${className} inline-code break-words whitespace-pre-wrap`}
-            style={{ fontFamily: '"Source Code Pro", monospace' }}
+            className={`${className} inline-code break-words whitespace-pre-wrap bg-[#323238] text-[#DCD9D4] rounded px-[4.8px] py-[2.4px]`}
+            style={{
+              boxDecorationBreak: "clone",
+              WebkitBoxDecorationBreak: "clone", // For Safari support
+              backgroundClip: "padding-box",
+            }}
             {...props}
           >
             {children}
@@ -308,7 +315,6 @@ const MarkdownEditor: React.FC = () => {
         {children}
       </p>
     ),
-    // Add other components as needed
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -527,11 +533,6 @@ const MarkdownEditor: React.FC = () => {
       />
     </div>
   );
-};
-
-// Utility function to generate a simple Base64 encoded ID from a string
-const generateStableId = (str: string): string => {
-  return `code-${btoa(str).replace(/=/g, "")}`;
 };
 
 export default MarkdownEditor;
