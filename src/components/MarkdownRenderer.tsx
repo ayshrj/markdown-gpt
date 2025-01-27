@@ -146,6 +146,7 @@ const MarkdownEditor: React.FC = () => {
         //     );
         //   }, 0);
         // }
+
         setPasted(true);
         setTimeout(() => setPasted(false), 2000);
       } else {
@@ -160,47 +161,32 @@ const MarkdownEditor: React.FC = () => {
   // Adjusted Typography Styles for Better Line Spacing
   const customTypographyStyles = {
     h1: {
-      fontSize: "1.75rem", // Slightly smaller than before
-      fontWeight: 600,
-      margin: "1rem 0 0.5rem",
-      lineHeight: "1.3",
+      fontSize: "2.25rem", // Slightly smaller than before
+      fontWeight: 700,
+      letterSpacing: "-0.04rem",
+      margin: "0 0 2.25rem",
+      lineHeight: "1.1111111",
     },
     h2: {
       fontSize: "1.5rem",
       fontWeight: 600,
-      margin: "1rem 0 0.5rem",
-      lineHeight: "1.3",
+      margin: "2rem 0 1rem",
+      lineHeight: "1.3333333",
     },
     h3: {
       fontSize: "1.25rem",
       fontWeight: 600,
-      margin: "0.75rem 0 0.5rem",
-      lineHeight: "1.3",
-    },
-    h4: {
-      fontSize: "1.125rem",
-      fontWeight: 600,
-      margin: "0.75rem 0 0.5rem",
-      lineHeight: "1.3",
-    },
-    h5: {
-      fontSize: "1rem",
-      fontWeight: 600,
-      margin: "0.5rem 0 0.5rem",
-      lineHeight: "1.3",
-    },
-    h6: {
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      margin: "0.5rem 0 0.5rem",
-      lineHeight: "1.3",
+      margin: "1rem 0 0.5rem",
+      lineHeight: "1.6",
     },
     p: {
-      margin: "0.5rem 0",
-      lineHeight: "1.6", // Adjusted line height for better readability
+      fontSize: "1rem",
+      margin: "0 0 0.5rem",
+      lineHeight: "1.6",
     },
     li: {
-      margin: "0.25rem 0",
+      margin: "0.5rem 0",
+      padding: "0 0 0 0.375rem",
       lineHeight: "1.6",
     },
   };
@@ -209,9 +195,6 @@ const MarkdownEditor: React.FC = () => {
     h1: (props) => <h1 style={customTypographyStyles.h1} {...props} />,
     h2: (props) => <h2 style={customTypographyStyles.h2} {...props} />,
     h3: (props) => <h3 style={customTypographyStyles.h3} {...props} />,
-    h4: (props) => <h4 style={customTypographyStyles.h4} {...props} />,
-    h5: (props) => <h5 style={customTypographyStyles.h5} {...props} />,
-    h6: (props) => <h6 style={customTypographyStyles.h6} {...props} />,
 
     code: ({ inline, className, children, ...props }: CustomCodeProps) => {
       const match = /language-(\w+)/.exec(className || "");
@@ -294,6 +277,17 @@ const MarkdownEditor: React.FC = () => {
       }
     },
 
+    // Custom Renderer for <hr />
+    hr: () => {
+      if (previewMode === "full") {
+        return (
+          <div className="py-[48px]">
+            <hr />
+          </div>
+        );
+      }
+    },
+
     ul: ({ children, ...props }) => (
       <ul className="list-disc pl-5 mb-4 break-words" {...props}>
         {children}
@@ -337,11 +331,7 @@ const MarkdownEditor: React.FC = () => {
   }, [previewMode, sections.length]);
 
   return (
-    <div
-      className={`container min-w-full flex justify-center min-h-screen transition-all relative ${
-        markdown.length > 0 ? "" : ""
-      }`}
-    >
+    <div className="container min-w-full flex justify-center min-h-screen transition-all relative">
       <div className="w-full max-w-3xl bg-gpt-background border-none max-md:px-4">
         <div className="min-h-screen relative pt-4 flex flex-col">
           <div
@@ -476,7 +466,7 @@ const MarkdownEditor: React.FC = () => {
                   {sections[currentPage]}
                 </ReactMarkdown>
                 {markdown.length > 0 && (
-                  <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-3xl px-4 bg-gpt-background">
+                  <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-3xl px-4 bg-gpt-background">
                     <div className="flex justify-between items-center py-2 rounded shadow">
                       <button
                         className={`bg-gpt-foreground text-gpt-background px-4 py-2 rounded-full text-sm ${
