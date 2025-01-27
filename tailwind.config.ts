@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", "sans-serif"],
+      },
       colors: {
         "gpt-background": "hsl(var(--gpt-background))",
         "gpt-foreground": "hsl(var(--gpt-foreground))",
