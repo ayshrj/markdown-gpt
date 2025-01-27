@@ -20,6 +20,7 @@ const IconProvider: React.FC<{
   strokeLinecap = "round",
   strokeLinejoin = "round",
   onClick,
+  ...props
 }) => {
   let iconComponent;
 
@@ -116,6 +117,7 @@ const IconProvider: React.FC<{
       strokeLinejoin={strokeLinejoin}
       onClick={onClick}
       viewBox="0 0 24 24"
+      {...props}
     >
       {iconComponent}
     </svg>

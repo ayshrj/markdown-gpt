@@ -41,7 +41,7 @@ body {
   }
 
   .dark {
-    --gpt-background: 0 0% 13%;
+    --gpt-background: 200 6% 10%;
     --gpt-foreground: 0 0% 100%;
     --gpt-input-background: 0 0% 18%;
     --background: 240 10% 3.9%;

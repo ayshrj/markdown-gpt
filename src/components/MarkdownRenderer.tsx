@@ -10,10 +10,11 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism"; //
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize"; // Added for security
+import rehypeSanitize from "rehype-sanitize";
 import IconProvider from "@/lib/iconProvider";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-// Define custom props for the code component
 interface CustomCodeProps extends React.HTMLAttributes<HTMLElement> {
   inline?: boolean;
   className?: string;
@@ -27,6 +28,9 @@ const MarkdownEditor: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [copied, setCopied] = useState<boolean>(false);
   const [pasted, setPasted] = useState<boolean>(false);
+  const [copiedCodeContent, setCopiedCodeContent] = useState<string | null>(
+    null
+  );
 
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -70,7 +74,7 @@ const MarkdownEditor: React.FC = () => {
     if (file) {
       // Validate file type
       if (file.type !== "text/plain") {
-        alert("Please upload a valid .txt file.");
+        toast.info("Please upload a valid .txt file.");
         return;
       }
 
@@ -81,17 +85,17 @@ const MarkdownEditor: React.FC = () => {
           setMarkdown(text);
           setCurrentPage(0); // Reset to first page after upload
         } else {
-          alert("Failed to read the file.");
+          toast.error("Failed to read the file.");
         }
       };
       reader.onerror = () => {
-        alert("An error occurred while reading the file.");
+        toast.error("An error occurred while reading the file.");
       };
       reader.readAsText(file);
     }
   };
 
-  // Handle Copy to Clipboard
+  // Handle Copy Entire Markdown to Clipboard
   const handleCopy = () => {
     if (!markdown) return; // Do nothing if there's nothing to copy
 
@@ -102,7 +106,24 @@ const MarkdownEditor: React.FC = () => {
         setTimeout(() => setCopied(false), 2000);
       })
       .catch(() => {
-        alert("Failed to copy the content.");
+        toast.error("Failed to copy the content.");
+      });
+  };
+
+  // Handle Copy Code Block to Clipboard
+  const handleCodeCopy = (code: string) => {
+    if (!code) return; // Do nothing if there's nothing to copy
+
+    navigator.clipboard
+      .writeText(code)
+      .then(() => {
+        setCopiedCodeContent(code);
+        setTimeout(() => {
+          setCopiedCodeContent(null);
+        }, 2000);
+      })
+      .catch(() => {
+        toast.error("Failed to copy the code block.");
       });
   };
 
@@ -110,7 +131,7 @@ const MarkdownEditor: React.FC = () => {
   const handlePaste = async () => {
     // Check if the Clipboard API is supported
     if (!navigator.clipboard) {
-      alert("Clipboard API not supported in this browser.");
+      toast.error("Clipboard API not supported in this browser.");
       return;
     }
 
@@ -145,13 +166,14 @@ const MarkdownEditor: React.FC = () => {
         setCurrentPage(0); // Reset to the first page if applicable
 
         setPasted(true);
+        toast.success("Content pasted from clipboard!");
         setTimeout(() => setPasted(false), 2000);
       } else {
-        alert("Clipboard is empty or does not contain text.");
+        toast.info("Clipboard is empty or does not contain text.");
       }
     } catch (error) {
       console.error("Failed to read clipboard contents:", error);
-      alert("Failed to paste content from clipboard.");
+      toast.error("Failed to paste content from clipboard.");
     }
   };
 
@@ -211,16 +233,56 @@ const MarkdownEditor: React.FC = () => {
         // Define the correct type for the style
         const syntaxStyle: SyntaxHighlighterProps["style"] = vscDarkPlus;
 
+        // Generate a stable ID based on the code content
+        const codeContent = String(children).trim();
+        const id = `code-${Buffer.from(codeContent).toString("base64")}`;
+
         return (
-          <SyntaxHighlighter
-            style={syntaxStyle as any}
-            language={match[1]}
-            PreTag="div"
-            className="!bg-[#0D0D0D] overflow-x-auto rounded" // Allows horizontal scrolling
-            {...props}
-          >
-            {String(children).replace(/\n$/, "")}
-          </SyntaxHighlighter>
+          <div className="bg-[#0D0D0D] overflow-x-auto rounded my-4">
+            <div className="bg-[#232628] w-full flex min-h-9 px-4 justify-between items-center text-[#b9b3a9]">
+              <div className="font-mono text-xs">{match[1]}</div>
+              <div className="flex items-center rounded font-sans text-xs">
+                <button
+                  className="flex gap-1 items-center select-none py-1 focus:outline-none"
+                  aria-label="Copy"
+                  onClick={() => handleCodeCopy(codeContent)}
+                  id={id}
+                >
+                  {copiedCodeContent === codeContent ? (
+                    <>
+                      <IconProvider
+                        type="Check"
+                        strokeWidth={0.1}
+                        fill="currentColor"
+                        size={12}
+                      />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <IconProvider
+                        type="Copy"
+                        strokeWidth={0.1}
+                        fill="currentColor"
+                        size={12}
+                      />
+                      Copy
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+            <SyntaxHighlighter
+              style={syntaxStyle as any}
+              language={match[1]}
+              PreTag="div"
+              id="codeblock"
+              className="!bg-[#0D0D0D] overflow-x-auto rounded !p-4" // Allows horizontal scrolling
+              {...props}
+            >
+              {codeContent.replace(/\n$/, "")}
+            </SyntaxHighlighter>
+          </div>
         );
       } else {
         return (
@@ -292,12 +354,14 @@ const MarkdownEditor: React.FC = () => {
         <div className="min-h-[100dvh] relative pt-4 flex flex-col">
           <div
             className={`flex w-full cursor-text flex-col rounded-3xl pl-2 pr-4 focus:outline-none transition-colors contain-inline-size bg-gpt-input-background min-h-[88px] max-h-[216px] outline-none text-base border-none items-center ${
-              markdown.length > 0 ? "" : "absolute top-1/2 -translate-y-1/2"
+              markdown.length > 0
+                ? ""
+                : "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
             }`}
           >
             <div className="flex flex-col w-full min-h-full relative">
               {markdown.length < 1 && (
-                <div className="absolute left-1/2 top-0 -translate-y-[90px] sm:-translate-y-[60px] font-semibold w-full flex justify-center -translate-x-1/2 text-3xl">
+                <div className="absolute left-1/2 top-0 -translate-y-[90px] sm:-translate-y-[60px] font-semibold w-full flex justify-center -translate-x-1/2 text-3xl pointer-events-none">
                   Write your markdown here.
                 </div>
               )}
@@ -465,8 +529,26 @@ const MarkdownEditor: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Toast Container for Notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
+};
+
+// Utility function to generate a simple Base64 encoded ID from a string
+const generateStableId = (str: string): string => {
+  return `code-${btoa(str).replace(/=/g, "")}`;
 };
 
 export default MarkdownEditor;
