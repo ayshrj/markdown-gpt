@@ -354,7 +354,7 @@ const MarkdownEditor: React.FC = () => {
           >
             <div className="flex flex-col w-full min-h-full relative">
               {markdown.length < 1 && (
-                <div className="absolute left-1/2 top-0 -translate-y-[60px] font-semibold w-full flex justify-center -translate-x-1/2 text-lg pointer-events-none text-gray-500">
+                <div className="absolute left-1/2 top-0 -translate-y-[90px] sm:-translate-y-[60px] font-semibold w-full flex justify-center -translate-x-1/2 pointer-events-none text-gpt-foreground text-3xl">
                   Write your markdown here.
                 </div>
               )}
