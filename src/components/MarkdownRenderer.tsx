@@ -6,7 +6,7 @@ import {
   Prism as SyntaxHighlighter,
   SyntaxHighlighterProps,
 } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism"; // Correct ESM import
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -22,7 +22,6 @@ interface CustomCodeProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 const MarkdownEditor: React.FC = () => {
-  // Initialize state with empty string
   const [markdown, setMarkdown] = useState<string>("");
   const [previewMode, setPreviewMode] = useState<string>("paginated");
   const [currentPage, setCurrentPage] = useState(0);
@@ -32,10 +31,8 @@ const MarkdownEditor: React.FC = () => {
     null
   );
 
-  // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Load markdown from localStorage on component mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedMarkdown = localStorage.getItem("markdown-content");
@@ -45,7 +42,6 @@ const MarkdownEditor: React.FC = () => {
     }
   }, []);
 
-  // Save markdown to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("markdown-content", markdown);
@@ -54,25 +50,22 @@ const MarkdownEditor: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMarkdown(e.target.value);
-    setCurrentPage(0); // Reset to first page on markdown change
+    setCurrentPage(0);
   };
 
   const sections = useMemo(() => {
     return markdown.split("---").map((section) => section.trim());
   }, [markdown]);
 
-  // Handler to trigger file input click
   const handleUploadClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
-  // Handler for file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
-      // Validate file type
       if (file.type !== "text/plain") {
         toast.info("Please upload a valid .txt file.");
         return;
@@ -83,7 +76,7 @@ const MarkdownEditor: React.FC = () => {
         const text = event.target?.result;
         if (typeof text === "string") {
           setMarkdown(text);
-          setCurrentPage(0); // Reset to first page after upload
+          setCurrentPage(0);
         } else {
           toast.error("Failed to read the file.");
         }
@@ -95,9 +88,8 @@ const MarkdownEditor: React.FC = () => {
     }
   };
 
-  // Handle Copy Entire Markdown to Clipboard
   const handleCopy = () => {
-    if (!markdown) return; // Do nothing if there's nothing to copy
+    if (!markdown) return;
 
     navigator.clipboard
       .writeText(markdown)
@@ -110,9 +102,8 @@ const MarkdownEditor: React.FC = () => {
       });
   };
 
-  // Handle Copy Code Block to Clipboard
   const handleCodeCopy = (code: string) => {
-    if (!code) return; // Do nothing if there's nothing to copy
+    if (!code) return;
 
     navigator.clipboard
       .writeText(code)
@@ -127,44 +118,33 @@ const MarkdownEditor: React.FC = () => {
       });
   };
 
-  // Handle Paste from Clipboard
   const handlePaste = async () => {
-    // Check if the Clipboard API is supported
     if (!navigator.clipboard) {
       toast.error("Clipboard API not supported in this browser.");
       return;
     }
 
     try {
-      // Read text from the clipboard
       const clipboardText = await navigator.clipboard.readText();
 
       if (clipboardText) {
-        // Option 1: Append the pasted text to the existing markdown
         setMarkdown((prevMarkdown) => `${prevMarkdown}\n${clipboardText}`);
+        setCurrentPage(0);
 
-        // Option 2: Insert the pasted text at the cursor position
-        // Uncomment the following block to enable insertion at cursor
-
-        /*
-          if (textareaRef.current) {
-            const { selectionStart, selectionEnd } = textareaRef.current;
-            const before = markdown.substring(0, selectionStart);
-            const after = markdown.substring(selectionEnd);
-            setMarkdown(`${before}${clipboardText}${after}`);
-            // Optionally, set the cursor position after the pasted text
-            setTimeout(() => {
-              textareaRef.current?.focus();
-              textareaRef.current?.setSelectionRange(
-                selectionStart + clipboardText.length,
-                selectionStart + clipboardText.length
-              );
-            }, 0);
-          }
-          */
-
-        setCurrentPage(0); // Reset to the first page if applicable
-
+        // if (textareaRef.current) {
+        //   const { selectionStart, selectionEnd } = textareaRef.current;
+        //   const before = markdown.substring(0, selectionStart);
+        //   const after = markdown.substring(selectionEnd);
+        //   setMarkdown(`${before}${clipboardText}${after}`);
+        //   // Optionally, set the cursor position after the pasted text
+        //   setTimeout(() => {
+        //     textareaRef.current?.focus();
+        //     textareaRef.current?.setSelectionRange(
+        //       selectionStart + clipboardText.length,
+        //       selectionStart + clipboardText.length
+        //     );
+        //   }, 0);
+        // }
         setPasted(true);
         toast.success("Content pasted from clipboard!");
         setTimeout(() => setPasted(false), 2000);
@@ -177,47 +157,54 @@ const MarkdownEditor: React.FC = () => {
     }
   };
 
-  // Styles close to ChatGPT's typical heading sizes
+  // Adjusted Typography Styles for Better Line Spacing
   const customTypographyStyles = {
     h1: {
-      fontSize: "1.875rem", // ~30px
+      fontSize: "1.75rem", // Slightly smaller than before
       fontWeight: 600,
-      margin: "1rem 0 0.75rem",
+      margin: "1rem 0 0.5rem",
       lineHeight: "1.3",
     },
     h2: {
-      fontSize: "1.5rem", // ~24px
+      fontSize: "1.5rem",
       fontWeight: 600,
-      margin: "1rem 0 0.75rem",
+      margin: "1rem 0 0.5rem",
       lineHeight: "1.3",
     },
     h3: {
-      fontSize: "1.25rem", // ~20px (as requested)
+      fontSize: "1.25rem",
       fontWeight: 600,
-      margin: "1rem 0 0.5rem",
+      margin: "0.75rem 0 0.5rem",
       lineHeight: "1.3",
     },
     h4: {
-      fontSize: "1.125rem", // ~18px
+      fontSize: "1.125rem",
       fontWeight: 600,
-      margin: "1rem 0 0.5rem",
+      margin: "0.75rem 0 0.5rem",
       lineHeight: "1.3",
     },
     h5: {
-      fontSize: "1rem", // 16px
+      fontSize: "1rem",
       fontWeight: 600,
-      margin: "0.75rem 0 0.5rem",
+      margin: "0.5rem 0 0.5rem",
       lineHeight: "1.3",
     },
     h6: {
-      fontSize: "0.875rem", // 14px
+      fontSize: "0.875rem",
       fontWeight: 600,
-      margin: "0.75rem 0 0.5rem",
+      margin: "0.5rem 0 0.5rem",
       lineHeight: "1.3",
+    },
+    p: {
+      margin: "0.5rem 0",
+      lineHeight: "1.6", // Adjusted line height for better readability
+    },
+    li: {
+      margin: "0.25rem 0",
+      lineHeight: "1.6",
     },
   };
 
-  // Define the custom components for ReactMarkdown
   const components: Components = {
     h1: (props) => <h1 style={customTypographyStyles.h1} {...props} />,
     h2: (props) => <h2 style={customTypographyStyles.h2} {...props} />,
@@ -226,14 +213,11 @@ const MarkdownEditor: React.FC = () => {
     h5: (props) => <h5 style={customTypographyStyles.h5} {...props} />,
     h6: (props) => <h6 style={customTypographyStyles.h6} {...props} />,
 
-    // Code blocks
     code: ({ inline, className, children, ...props }: CustomCodeProps) => {
       const match = /language-(\w+)/.exec(className || "");
       if (!inline && match) {
-        // Define the correct type for the style
         const syntaxStyle: SyntaxHighlighterProps["style"] = vscDarkPlus;
 
-        // Generate a stable ID based on the code content
         const codeContent = String(children).trim();
         const id = `code-${Buffer.from(codeContent).toString("base64")}`;
 
@@ -277,7 +261,7 @@ const MarkdownEditor: React.FC = () => {
               language={match[1]}
               PreTag="div"
               id="codeblock"
-              className="!bg-[#0D0D0D] overflow-x-auto rounded !p-4" // Allows horizontal scrolling
+              className="!bg-[#0D0D0D] overflow-x-auto rounded !p-4"
               {...props}
             >
               {codeContent.replace(/\n$/, "")}
@@ -296,14 +280,13 @@ const MarkdownEditor: React.FC = () => {
       }
     },
 
-    // Lists (unordered, ordered)
     ul: ({ children, ...props }) => (
-      <ul className="list-disc pl-6 mb-4 break-words" {...props}>
+      <ul className="list-disc pl-5 mb-4 break-words" {...props}>
         {children}
       </ul>
     ),
     ol: ({ children, ...props }) => (
-      <ol className="list-decimal pl-6 mb-4 break-words" {...props}>
+      <ol className="list-decimal pl-5 mb-4 break-words" {...props}>
         {children}
       </ol>
     ),
@@ -313,7 +296,7 @@ const MarkdownEditor: React.FC = () => {
       </li>
     ),
     p: ({ children, ...props }) => (
-      <p className="break-words" {...props}>
+      <p style={customTypographyStyles.p} className="break-words" {...props}>
         {children}
       </p>
     ),
@@ -323,10 +306,8 @@ const MarkdownEditor: React.FC = () => {
   const handleKeyDown = (e: KeyboardEvent) => {
     if (previewMode === "paginated") {
       if (e.code === "ArrowLeft") {
-        // Navigate to the previous page
         setCurrentPage((prevPage) => Math.max(0, prevPage - 1));
       } else if (e.code === "ArrowRight") {
-        // Navigate to the next page
         setCurrentPage((prevPage) =>
           Math.min(sections.length - 1, prevPage + 1)
         );
@@ -334,11 +315,9 @@ const MarkdownEditor: React.FC = () => {
     }
   };
 
-  // Attach the global keydown listener
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
 
-    // Cleanup the event listener on component unmount
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
@@ -346,14 +325,14 @@ const MarkdownEditor: React.FC = () => {
 
   return (
     <div
-      className={`container min-w-full flex justify-center min-h-[100dvh] transition-all relative ${
+      className={`container min-w-full flex justify-center min-h-screen transition-all relative ${
         markdown.length > 0 ? "" : ""
       }`}
     >
       <div className="w-full max-w-3xl bg-gpt-background border-none max-md:px-4">
-        <div className="min-h-[100dvh] relative pt-4 flex flex-col">
+        <div className="min-h-screen relative pt-4 flex flex-col">
           <div
-            className={`flex w-full cursor-text flex-col rounded-3xl pl-2 pr-4 focus:outline-none transition-colors contain-inline-size bg-gpt-input-background min-h-[88px] max-h-[216px] outline-none text-base border-none items-center ${
+            className={`flex w-full cursor-text flex-col rounded-3xl px-4 focus:outline-none transition-colors bg-gpt-input-background min-h-[88px] max-h-[216px] outline-none text-base border-none items-center ${
               markdown.length > 0
                 ? ""
                 : "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
@@ -361,7 +340,7 @@ const MarkdownEditor: React.FC = () => {
           >
             <div className="flex flex-col w-full min-h-full relative">
               {markdown.length < 1 && (
-                <div className="absolute left-1/2 top-0 -translate-y-[90px] sm:-translate-y-[60px] font-semibold w-full flex justify-center -translate-x-1/2 text-3xl pointer-events-none">
+                <div className="absolute left-1/2 top-0 -translate-y-[60px] font-semibold w-full flex justify-center -translate-x-1/2 text-lg pointer-events-none text-gray-500">
                   Write your markdown here.
                 </div>
               )}
@@ -377,8 +356,9 @@ const MarkdownEditor: React.FC = () => {
                 onChange={handleChange}
                 autoresize={true}
                 placeholder="Message MarkdownGPT"
+                style={{ lineHeight: "1.6" }} // Added line height for better readability
               />
-              <div className="min-h-[44px] max-h-[44px] flex w-full justify-between items-center px-2">
+              <div className="min-h-[44px] max-h-[44px] flex w-full justify-between items-center px-2 mt-1">
                 <span className="flex gap-4">
                   <IconProvider
                     onClick={handleUploadClick}
@@ -447,29 +427,24 @@ const MarkdownEditor: React.FC = () => {
                 </span>
 
                 {markdown && (
-                  <>
-                    <div className="bg-gpt-foreground min-h-8 min-w-8 h-8 w-8 rounded-full text-gpt-background flex items-center justify-center translate-x-3 cursor-pointer">
-                      <IconProvider
-                        type="Clear"
-                        onClick={() => {
-                          setMarkdown("");
-                          setCurrentPage(0);
-                          // Optionally, remove from localStorage when cleared
-                          if (typeof window !== "undefined") {
-                            localStorage.removeItem("markdown-content");
-                          }
-                        }}
-                      />
-                    </div>
-                  </>
+                  <div className="bg-gpt-foreground min-h-8 min-w-8 h-8 w-8 rounded-full text-gpt-background flex items-center justify-center translate-x-3 cursor-pointer">
+                    <IconProvider
+                      type="Clear"
+                      onClick={() => {
+                        setMarkdown("");
+                        setCurrentPage(0);
+                        if (typeof window !== "undefined") {
+                          localStorage.removeItem("markdown-content");
+                        }
+                      }}
+                    />
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="prose dark:prose-invert max-w-none break-words mt-2 pb-20">
-            {" "}
-            {/* Added pb-20 */}
+          <div className="prose dark:prose-invert max-w-none break-words mt-4 pb-20">
             {previewMode === "full" ? (
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
@@ -482,13 +457,13 @@ const MarkdownEditor: React.FC = () => {
               <div className="flex flex-col min-h-full">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw, rehypeSanitize]} // Added rehypeSanitize for security
+                  rehypePlugins={[rehypeRaw, rehypeSanitize]}
                   components={components}
                 >
                   {sections[currentPage]}
                 </ReactMarkdown>
                 {markdown.length > 0 && (
-                  <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-3xl px-4 bg-gpt-background">
+                  <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-3xl px-4 bg-gpt-background">
                     <div className="flex justify-between items-center py-2 rounded shadow">
                       <button
                         className={`bg-gpt-foreground text-gpt-background px-4 py-2 rounded-full text-sm ${
