@@ -147,7 +147,6 @@ const MarkdownEditor: React.FC = () => {
         //   }, 0);
         // }
         setPasted(true);
-        toast.success("Content pasted from clipboard!");
         setTimeout(() => setPasted(false), 2000);
       } else {
         toast.info("Clipboard is empty or does not contain text.");
