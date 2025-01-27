@@ -14,6 +14,7 @@ import rehypeSanitize from "rehype-sanitize";
 import IconProvider from "@/lib/iconProvider";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "typeface-source-code-pro";
 
 interface CustomCodeProps extends React.HTMLAttributes<HTMLElement> {
   inline?: boolean;
@@ -224,7 +225,12 @@ const MarkdownEditor: React.FC = () => {
         return (
           <div className="bg-[#0D0D0D] overflow-x-auto rounded my-4">
             <div className="bg-[#232628] w-full flex min-h-9 px-4 justify-between items-center text-[#b9b3a9]">
-              <div className="font-mono text-xs">{match[1]}</div>
+              <div
+                className="font-mono text-xs"
+                style={{ fontFamily: '"Source Code Pro", monospace' }}
+              >
+                {match[1]}
+              </div>
               <div className="flex items-center rounded font-sans text-xs">
                 <button
                   className="flex gap-1 items-center select-none py-1 focus:outline-none"
@@ -263,6 +269,7 @@ const MarkdownEditor: React.FC = () => {
               id="codeblock"
               className="!bg-[#0D0D0D] overflow-x-auto rounded !p-4"
               {...props}
+              customStyle={{ fontFamily: '"Source Code Pro", monospace' }}
             >
               {codeContent.replace(/\n$/, "")}
             </SyntaxHighlighter>
@@ -272,6 +279,7 @@ const MarkdownEditor: React.FC = () => {
         return (
           <code
             className={`${className} inline-code break-words whitespace-pre-wrap`}
+            style={{ fontFamily: '"Source Code Pro", monospace' }}
             {...props}
           >
             {children}

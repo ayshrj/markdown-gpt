@@ -31,6 +31,7 @@
     "remark-math": "^6.0.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "typeface-source-code-pro": "^1.1.13",
     "uuid": "^11.0.5"
   },
   "devDependencies": {
