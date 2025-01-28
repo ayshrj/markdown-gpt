@@ -31,6 +31,7 @@ const MarkdownEditor: React.FC = () => {
   const [copiedCodeContent, setCopiedCodeContent] = useState<string | null>(
     null
   );
+  const [pinTextArea, setPinTextArea] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -336,6 +337,8 @@ const MarkdownEditor: React.FC = () => {
         <div className="min-h-screen relative pt-4 flex flex-col">
           <div
             className={`flex w-full cursor-text flex-col rounded-3xl px-4 focus:outline-none transition-colors bg-gpt-input-background min-h-[88px] max-h-[216px] outline-none text-base border-none items-center ${
+              pinTextArea ? "sticky top-4" : ""
+            } ${
               markdown.length > 0
                 ? ""
                 : "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
@@ -399,6 +402,19 @@ const MarkdownEditor: React.FC = () => {
                       className="cursor-pointer"
                       strokeWidth={0.1}
                       fill="currentColor"
+                    />
+                  )}
+                  {pinTextArea ? (
+                    <IconProvider
+                      type="Pin"
+                      className="cursor-pointer"
+                      onClick={() => setPinTextArea(false)}
+                    />
+                  ) : (
+                    <IconProvider
+                      type="PinOff"
+                      className="cursor-pointer"
+                      onClick={() => setPinTextArea(true)}
                     />
                   )}
                   {markdown.length > 0 &&
