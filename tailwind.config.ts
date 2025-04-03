@@ -18,6 +18,8 @@ export default {
         "gpt-input-background": "hsl(var(--gpt-input-background))",
         "gpt-input-placholder-foreground":
           "hsl(var(--gpt-input-placholder-foreground))",
+        "gpt-user-chat-background": "hsla(var(--gpt-user-chat-background))",
+        "gpt-user-chat-foreground": "hsl(var(--gpt-user-chat-foreground))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

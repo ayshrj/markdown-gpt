@@ -9,6 +9,8 @@
     --gpt-foreground: 0 0% 0%;
     --gpt-input-background: 0 0% 96%;
     --gpt-input-placholder-foreground: 0 0% 71%;
+    --gpt-user-chat-background: 0 0% 19%;
+    --gpt-user-chat-foreground: 0 0% 93%;
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
