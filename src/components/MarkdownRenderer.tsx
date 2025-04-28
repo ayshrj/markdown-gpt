@@ -9,8 +9,11 @@ import {
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 import rehypeRaw from "rehype-raw";
+import rehypeKatex from "rehype-katex";
 import rehypeSanitize from "rehype-sanitize";
+import "katex/dist/katex.min.css";
 import IconProvider from "@/lib/iconProvider";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -134,21 +137,6 @@ const MarkdownEditor: React.FC = () => {
         setMarkdown((prevMarkdown) => `${prevMarkdown}\n${clipboardText}`);
         setCurrentPage(0);
 
-        // if (textareaRef.current) {
-        //   const { selectionStart, selectionEnd } = textareaRef.current;
-        //   const before = markdown.substring(0, selectionStart);
-        //   const after = markdown.substring(selectionEnd);
-        //   setMarkdown(`${before}${clipboardText}${after}`);
-        //   // Optionally, set the cursor position after the pasted text
-        //   setTimeout(() => {
-        //     textareaRef.current?.focus();
-        //     textareaRef.current?.setSelectionRange(
-        //       selectionStart + clipboardText.length,
-        //       selectionStart + clipboardText.length
-        //     );
-        //   }, 0);
-        // }
-
         setPasted(true);
         setTimeout(() => setPasted(false), 2000);
       } else {
@@ -160,10 +148,9 @@ const MarkdownEditor: React.FC = () => {
     }
   };
 
-  // Adjusted Typography Styles for Better Line Spacing
   const customTypographyStyles = {
     h1: {
-      fontSize: "2.25rem", // Slightly smaller than before
+      fontSize: "2.25rem",
       fontWeight: 700,
       letterSpacing: "-0.04rem",
       margin: "0 0 2.25rem",
@@ -268,7 +255,7 @@ const MarkdownEditor: React.FC = () => {
             className={`${className} inline-code break-words whitespace-pre-wrap bg-[#323238] text-[#DCD9D4] rounded px-[4.8px] py-[2.4px]`}
             style={{
               boxDecorationBreak: "clone",
-              WebkitBoxDecorationBreak: "clone", // For Safari support
+              WebkitBoxDecorationBreak: "clone",
               backgroundClip: "padding-box",
             }}
             {...props}
@@ -279,7 +266,6 @@ const MarkdownEditor: React.FC = () => {
       }
     },
 
-    // Custom Renderer for <hr />
     hr: () => {
       if (previewMode === "full") {
         return (
@@ -313,7 +299,6 @@ const MarkdownEditor: React.FC = () => {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    // Prevent navigation if textarea is focused
     if (textareaRef.current && document.activeElement === textareaRef.current) {
       return;
     }
@@ -369,7 +354,7 @@ const MarkdownEditor: React.FC = () => {
                 onChange={handleChange}
                 autoresize={true}
                 placeholder="Message MarkdownGPT"
-                style={{ lineHeight: "1.6" }} // Added line height for better readability
+                style={{ lineHeight: "1.6" }}
               />
               <div className="min-h-[44px] max-h-[44px] flex w-full justify-between items-center px-2 mt-1">
                 <span className="flex gap-x-1">
@@ -400,7 +385,10 @@ const MarkdownEditor: React.FC = () => {
                       />
                     )}
                   </div>
-                  <div className="hover:bg-[#2A2A2A] px-1 rounded-lg h-8 w-8 flex justify-center items-center">
+                  <div
+                    className="
+                  hover:bg-[#2A2A2A] px-1 rounded-lg h-8 w-8 flex justify-center items-center"
+                  >
                     {pasted ? (
                       <IconProvider
                         type="Check"
@@ -482,8 +470,8 @@ const MarkdownEditor: React.FC = () => {
           <div className="prose dark:prose-invert max-w-none break-words mt-4 pb-20">
             {previewMode === "full" ? (
               <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
                 components={components}
               >
                 {markdown}
@@ -491,8 +479,8 @@ const MarkdownEditor: React.FC = () => {
             ) : (
               <div className="flex flex-col min-h-full">
                 <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
                   components={components}
                 >
                   {sections[currentPage]}
@@ -539,7 +527,6 @@ const MarkdownEditor: React.FC = () => {
           </div>
         </div>
       </div>
-      {/* Toast Container for Notifications */}
       <ToastContainer
         position="top-right"
         autoClose={2000}
