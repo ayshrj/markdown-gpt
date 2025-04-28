@@ -34,6 +34,7 @@ const MarkdownEditor: React.FC = () => {
   const [pinTextArea, setPinTextArea] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -312,6 +313,11 @@ const MarkdownEditor: React.FC = () => {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    // Prevent navigation if textarea is focused
+    if (textareaRef.current && document.activeElement === textareaRef.current) {
+      return;
+    }
+
     if (previewMode === "paginated") {
       if (e.code === "ArrowLeft") {
         setCurrentPage((prevPage) => Math.max(0, prevPage - 1));
@@ -351,6 +357,7 @@ const MarkdownEditor: React.FC = () => {
                 </div>
               )}
               <Textarea
+                ref={textareaRef}
                 className="
                   flex w-full cursor-text flex-col mx-2 my-2 
                   max-h-[216px] outline-none border-none 
@@ -365,60 +372,36 @@ const MarkdownEditor: React.FC = () => {
                 style={{ lineHeight: "1.6" }} // Added line height for better readability
               />
               <div className="min-h-[44px] max-h-[44px] flex w-full justify-between items-center px-2 mt-1">
-                <span className="flex gap-4">
-                  <IconProvider
-                    onClick={handleUploadClick}
-                    type="Clip"
-                    strokeWidth={0.1}
-                    className="cursor-pointer"
-                  />
-                  {previewMode === "full" ? (
+                <span className="flex gap-x-1">
+                  <div className="hover:bg-[#2A2A2A] px-1 rounded-lg h-8 w-8 flex justify-center items-center">
                     <IconProvider
-                      onClick={() => setPreviewMode("paginated")}
-                      className="cursor-pointer"
-                      type="Full"
+                      onClick={handleUploadClick}
+                      type="Clip"
                       strokeWidth={0.1}
-                      fill="currentColor"
-                    />
-                  ) : (
-                    <IconProvider
-                      onClick={() => setPreviewMode("full")}
                       className="cursor-pointer"
-                      type="Pagination"
-                      strokeWidth={0.1}
-                      fill="currentColor"
                     />
-                  )}
-                  {pasted ? (
-                    <IconProvider
-                      type="Check"
-                      strokeWidth={0.1}
-                      fill="currentColor"
-                    />
-                  ) : (
-                    <IconProvider
-                      type="Paste"
-                      onClick={handlePaste}
-                      className="cursor-pointer"
-                      strokeWidth={0.1}
-                      fill="currentColor"
-                    />
-                  )}
-                  {pinTextArea ? (
-                    <IconProvider
-                      type="Pin"
-                      className="cursor-pointer"
-                      onClick={() => setPinTextArea(false)}
-                    />
-                  ) : (
-                    <IconProvider
-                      type="PinOff"
-                      className="cursor-pointer"
-                      onClick={() => setPinTextArea(true)}
-                    />
-                  )}
-                  {markdown.length > 0 &&
-                    (copied ? (
+                  </div>
+                  <div className="hover:bg-[#2A2A2A] px-1 rounded-lg h-8 w-8 flex justify-center items-center">
+                    {previewMode === "full" ? (
+                      <IconProvider
+                        onClick={() => setPreviewMode("paginated")}
+                        className="cursor-pointer"
+                        type="Full"
+                        strokeWidth={0.1}
+                        fill="currentColor"
+                      />
+                    ) : (
+                      <IconProvider
+                        onClick={() => setPreviewMode("full")}
+                        className="cursor-pointer"
+                        type="Pagination"
+                        strokeWidth={0.1}
+                        fill="currentColor"
+                      />
+                    )}
+                  </div>
+                  <div className="hover:bg-[#2A2A2A] px-1 rounded-lg h-8 w-8 flex justify-center items-center">
+                    {pasted ? (
                       <IconProvider
                         type="Check"
                         strokeWidth={0.1}
@@ -426,16 +409,49 @@ const MarkdownEditor: React.FC = () => {
                       />
                     ) : (
                       <IconProvider
-                        type="Copy"
-                        onClick={handleCopy}
-                        className={`cursor-pointer ${
-                          markdown ? "" : "opacity-50 cursor-not-allowed"
-                        }`}
+                        type="Paste"
+                        onClick={handlePaste}
+                        className="cursor-pointer"
                         strokeWidth={0.1}
                         fill="currentColor"
                       />
-                    ))}
-
+                    )}
+                  </div>
+                  <div className="hover:bg-[#2A2A2A] px-1 rounded-lg h-8 w-8 flex justify-center items-center">
+                    {pinTextArea ? (
+                      <IconProvider
+                        type="Pin"
+                        className="cursor-pointer"
+                        onClick={() => setPinTextArea(false)}
+                      />
+                    ) : (
+                      <IconProvider
+                        type="PinOff"
+                        className="cursor-pointer"
+                        onClick={() => setPinTextArea(true)}
+                      />
+                    )}
+                  </div>
+                  <div className="hover:bg-[#2A2A2A] px-1 rounded-lg h-8 w-8 flex justify-center items-center">
+                    {markdown.length > 0 &&
+                      (copied ? (
+                        <IconProvider
+                          type="Check"
+                          strokeWidth={0.1}
+                          fill="currentColor"
+                        />
+                      ) : (
+                        <IconProvider
+                          type="Copy"
+                          onClick={handleCopy}
+                          className={`cursor-pointer ${
+                            markdown ? "" : "opacity-50 cursor-not-allowed"
+                          }`}
+                          strokeWidth={0.1}
+                          fill="currentColor"
+                        />
+                      ))}
+                  </div>
                   <input
                     type="file"
                     accept=".txt"
@@ -482,7 +498,7 @@ const MarkdownEditor: React.FC = () => {
                   {sections[currentPage]}
                 </ReactMarkdown>
                 {markdown.length > 0 && (
-                  <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-3xl px-4 bg-gpt-background">
+                  <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-3xl bg-gpt-background">
                     <div className="flex justify-between items-center py-2 rounded shadow">
                       <button
                         className={`bg-gpt-foreground text-gpt-background px-4 py-2 rounded-full text-sm ${
